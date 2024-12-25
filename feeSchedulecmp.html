@@ -1,0 +1,126 @@
+<template>
+    <lightning-card title="Fee Schedule" icon-name="custom:custom63">
+        <!-- Display spinner while loading -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading data..."></lightning-spinner>
+        </template>
+
+        <!-- Display table once data is loaded -->
+        <template if:false={isLoading}>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Billing Date</th>
+                        <!-- Render column headers -->
+                        <template for:each={columns} for:item="column">
+                            <th key={column.fieldName}>{column.label}</th>
+                        </template>
+                        <th>Fee Schedule Total</th>
+                        <th>Delete Fee Schedule</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Default Row -->
+                    <tr>
+                        <td></td>
+                        <template for:each={columns} for:item="column">
+                            <td key={column.fieldName}>
+                                <template if:true={isExternalTemplate}>
+                                    <div class="slds-box slds-p-top_small" style="background-color: white;">
+                                        <lightning-record-edit-form 
+                                        object-api-name="OpportunityService__c" 
+                                        
+                                        record-id={column.oppserviceId}>
+                                        <lightning-input-field 
+                                            field-name="Account__c" 
+                                            variant="label-hidden" 
+                                             data-id={column.oppserviceId}
+                                            onchange={handleAccountSelection} 
+                                            required>
+                                        </lightning-input-field>
+                                    </lightning-record-edit-form>
+                                    
+                                    </div>
+                                </template>
+                               
+                            </td>
+                        </template>
+                        <td></td>
+                    </tr>
+
+                    <!-- Combobox Row -->
+                    <tr>
+                        <td></td>
+                        <template for:each={columns} for:item="column">
+                            <td key={column.fieldName}>
+                                <lightning-combobox
+                                    value={column.feeType} 
+                                    data-id={column.oppserviceId}
+                                    options={feetypes}
+                                    placeholder="Select Fee Type"
+                                    onchange={handleFeeTypeChange}>
+                                </lightning-combobox>
+                            </td>
+                        </template>
+                        <td class="bold-currency">
+                            <lightning-formatted-number 
+                                value={defaultRowTotal} 
+                                format-style="currency" 
+                                currency-code="GBP">
+                            </lightning-formatted-number>
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <!-- Data Rows -->
+                    <template for:each={rows} for:item="row">
+                        <tr key={row.id}>
+                            <td>{row.billingDate}</td>
+                            <template for:each={row.fields} for:item="field">
+                                <td key={field.id}>
+                                    <lightning-input
+                                        type="number"
+                                        value={field.value}
+                                        data-id={field.id}
+                                        data-field={field.name}
+                                        onchange={handleInputChange}>
+                                    </lightning-input>
+                                </td>
+                            </template>
+                            <td class="bold-currency">
+                                <lightning-formatted-number 
+                                    value={row.rowtotal} 
+                                    format-style="currency" 
+                                    currency-code="GBP">
+                                </lightning-formatted-number>
+                            </td>
+                            <td>
+                                <lightning-button-icon
+                                    icon-name="utility:delete"
+                                    alternative-text="Delete Fee Schedule"
+                                    data-id={row.id}
+                                    class="delete-icon"
+                                    onclick={handleDeleteFeeSchedule}>
+                                </lightning-button-icon>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Service Total</td>
+                        <template for:each={columns} for:item="column">
+                            <td key={column.fieldName} class="bold-currency">
+                                <lightning-formatted-number 
+                                    value={column.servicetotal} 
+                                    format-style="currency" 
+                                    currency-code="GBP">
+                                </lightning-formatted-number>
+                            </td>
+                        </template>
+                    </tr>
+                </tfoot>
+            </table>
+        </template>
+    </lightning-card>
+</template>
